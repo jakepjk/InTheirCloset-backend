@@ -1,5 +1,6 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, Long } from 'typeorm';
+import { IsString, IsEnum } from 'class-validator';
 
 export enum Gender {
   male = 'male',
@@ -20,20 +21,35 @@ export enum AgeRange {
   '90~' = '90~',
 }
 
+export enum UserRole {
+  Admin = 'Admin',
+  Manager = 'Manager',
+  Client = 'Client',
+}
+
 @Entity()
 export class User extends CommonEntity {
   @Column('text')
+  @IsString()
   platform: string;
 
   @Column('text', { nullable: true })
+  @IsString()
   platformId?: string;
 
   @Column('text')
+  @IsString()
   nickname: string;
 
   @Column('enum', { nullable: true, enum: Gender })
+  @IsEnum(Gender)
   gender?: Gender;
 
   @Column('enum', { nullable: true, enum: AgeRange })
+  @IsEnum(AgeRange)
   age_range?: string;
+
+  @Column('enum', { enum: UserRole, default: UserRole.Client })
+  @IsEnum(UserRole)
+  role: UserRole;
 }

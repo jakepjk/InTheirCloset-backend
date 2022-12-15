@@ -5,4 +5,5 @@ export class UserLoginDto extends OmitType(User, [
   'id',
   'createdAt',
   'updatedAt',
+  'role',
 ]) {}

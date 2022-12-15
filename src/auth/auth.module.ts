@@ -1,15 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { KakaoStrategy } from 'src/auth/kakao.strategy';
+import { RoleGuard } from 'src/auth/role/role.guard';
+import { KakaoStrategy } from 'src/auth/strategy/kakao.strategy';
 import { User } from 'src/users/entities/user.entity';
+import { UsersModule } from 'src/users/users.module';
+import { UsersService } from 'src/users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -17,8 +20,16 @@ import { AuthService } from './auth.service';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy],
+  providers: [
+    AuthService,
+    KakaoStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+  ],
 })
 export class AuthModule {}

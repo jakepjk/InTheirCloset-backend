@@ -15,7 +15,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
-import { UserLoginDto } from 'src/users/dto/user-login.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -32,18 +32,20 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<any> {
     // these are the user details passed from the Kakao.strategy.ts file
-    const user = req.user as UserLoginDto;
+    const user = req.user as User;
 
     // above details can be used to generate a token and send back to the Client
     const { accessToken } = await this.authService.login(user);
 
-    const { platformId, nickname, gender, age_range } = user;
+    const { platform, platformId, nickname, gender, age_range, role } = user;
 
     const data = {
+      platform,
       platformId,
       nickname,
       gender,
       age_range,
+      role,
     };
 
     return { accessToken, data };
