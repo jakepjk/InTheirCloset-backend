@@ -22,18 +22,18 @@ export enum AgeRange {
 
 @Entity()
 export class User extends CommonEntity {
-  @Column()
+  @Column('text')
   platform: string;
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   platformId?: string;
 
-  @Column()
+  @Column('text')
   nickname: string;
 
-  @Column({ nullable: true, type: 'enum', enum: Gender })
+  @Column('enum', { nullable: true, enum: Gender })
   gender?: Gender;
 
-  @Column({ nullable: true, type: 'enum', enum: AgeRange })
+  @Column('enum', { nullable: true, enum: AgeRange })
   age_range?: string;
 }

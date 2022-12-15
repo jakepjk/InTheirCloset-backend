@@ -6,6 +6,8 @@ import * as Joi from 'joi';
 import { User } from 'src/users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { FashionModule } from './fashion/fashion.module';
+import { Fashion } from 'src/fashion/entities/fashion.entity';
 
 @Module({
   imports: [
@@ -32,10 +34,11 @@ import { JwtModule } from '@nestjs/jwt';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: process.env.NODE_ENV === 'dev',
-      entities: [User],
+      entities: [User, Fashion],
     }),
     UsersModule,
     AuthModule,
+    FashionModule,
   ],
   controllers: [],
   providers: [],
