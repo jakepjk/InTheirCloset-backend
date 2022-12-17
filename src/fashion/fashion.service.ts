@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Fashion } from 'src/fashion/entities/fashion.entity';
+import { Repository } from 'typeorm';
 import { CreateFashionDto } from './dto/create-fashion.dto';
 import { UpdateFashionDto } from './dto/update-fashion.dto';
 
 @Injectable()
 export class FashionService {
-  create(createFashionDto: CreateFashionDto) {
-    return 'This action adds a new fashion';
-  }
+  constructor(
+    @InjectRepository(Fashion)
+    private readonly fashionRepo: Repository<Fashion>,
+  ) {}
 
-  findAll() {
-    return `This action returns all fashion`;
-  }
+  /**
+   * Create
+   */
 
-  findOne(id: number) {
-    return `This action returns a #${id} fashion`;
-  }
+  /**
+   * Update
+   */
 
-  update(id: number, updateFashionDto: UpdateFashionDto) {
-    return `This action updates a #${id} fashion`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} fashion`;
-  }
+  /**
+   *
+   */
 }
