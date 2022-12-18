@@ -33,7 +33,7 @@ import { AppController } from 'src/app.controller';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: process.env.NODE_ENV !== 'prod',
+      synchronize: process.env.DB_SYNC === 'true',
       logging: process.env.NODE_ENV === 'dev',
       entities: [User, Fashion],
     }),
