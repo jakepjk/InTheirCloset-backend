@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { FashionModule } from './fashion/fashion.module';
 import { Fashion } from 'src/fashion/entities/fashion.entity';
+import { AppController } from 'src/app.controller';
 
 @Module({
   imports: [
@@ -40,7 +41,7 @@ import { Fashion } from 'src/fashion/entities/fashion.entity';
     AuthModule,
     FashionModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
