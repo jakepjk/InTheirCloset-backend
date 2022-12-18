@@ -5,4 +5,12 @@ export class CreateFashionDto extends OmitType(Fashion, [
   'id',
   'createdAt',
   'updatedAt',
+  'steps',
+  'representativeImage',
+  'images',
 ]) {}
+
+export class CreateFashionWithURLDto extends CreateFashionDto {
+  representativeImageURL: string;
+  imagesURL: string[];
+}

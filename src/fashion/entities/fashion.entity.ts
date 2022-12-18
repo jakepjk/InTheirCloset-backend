@@ -3,11 +3,12 @@ import { Column, Entity } from 'typeorm';
 import { IsString, IsEnum, IsNumber, IsArray } from 'class-validator';
 
 // TODO: Steps 목록 생성
-export enum Steps {}
-// 임시저장
-// 등록대기중
-// 등록됨
-// 삭제됨
+export enum Steps {
+  Saved = 'Saved',
+  Requested = 'Requested',
+  Registered = 'Registered',
+  Deleted = 'Deleted',
+}
 
 @Entity()
 export class Fashion extends CommonEntity {

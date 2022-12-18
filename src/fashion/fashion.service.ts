@@ -13,14 +13,26 @@ export class FashionService {
   ) {}
 
   /**
-   * Create
+   * Create Fashion Item with image URL
    */
 
   /**
-   * Update
+   * Create Fashion Item with image ID
    */
 
   /**
-   *
+   * Update Fashion Item exclude image
+   */
+
+  /**
+   * Add Image of Fashion Item with URL
+   */
+
+  /**
+   * Add Image of Fashion Item with ID
+   */
+
+  /**
+   * Delete one or more Image of Fashion Item
    */
 }
