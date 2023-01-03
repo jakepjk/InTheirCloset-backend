@@ -9,6 +9,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { FashionModule } from './fashion/fashion.module';
 import { Fashion } from 'src/fashion/entities/fashion.entity';
 import { AppController } from 'src/app.controller';
+import { CloudflareModule } from './cloudflare/cloudflare.module';
+import { FashionCategory } from 'src/fashion/entities/fashion.entity copy';
 
 @Module({
   imports: [
@@ -35,11 +37,17 @@ import { AppController } from 'src/app.controller';
       database: process.env.DB_NAME,
       synchronize: process.env.DB_SYNC === 'true',
       logging: process.env.NODE_ENV === 'dev',
-      entities: [User, Fashion],
+      entities: [User, Fashion, FashionCategory],
     }),
     UsersModule,
     AuthModule,
     FashionModule,
+    CloudflareModule.forRoot({
+      apiToken: process.env.CLOUDFLARE_API_TOKEN,
+      accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+      accountHash: process.env.CLOUDFLARE_ACCOUNT_HASH,
+      imageDeliveryURL: process.env.CLOUDFLARE_IMAGE_DELIVERY_URL,
+    }),
   ],
   controllers: [AppController],
   providers: [],

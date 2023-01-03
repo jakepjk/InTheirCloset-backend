@@ -24,7 +24,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       gender: kakao_account.gender_needs_agreement
         ? null
         : kakao_account.gender,
-      age_range: kakao_account.age_range_needs_agreement
+      ageRange: kakao_account.age_range_needs_agreement
         ? null
         : kakao_account.age_range,
     };

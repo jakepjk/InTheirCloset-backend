@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { Role } from 'src/auth/role/role.decorator';
+import { ApiHeaders } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
