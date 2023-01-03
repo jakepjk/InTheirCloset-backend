@@ -1,6 +1,7 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, Long } from 'typeorm';
 import { IsString, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum Gender {
   male = 'male',
@@ -31,25 +32,31 @@ export enum UserRole {
 export class User extends CommonEntity {
   @Column('text')
   @IsString()
+  @ApiProperty()
   platform: string;
 
   @Column('text', { nullable: true })
   @IsString()
+  @ApiProperty()
   platformId?: string;
 
   @Column('text')
   @IsString()
+  @ApiProperty()
   nickname: string;
 
   @Column('enum', { nullable: true, enum: Gender })
   @IsEnum(Gender)
+  @ApiProperty({ enum: Gender })
   gender?: Gender;
 
   @Column('enum', { nullable: true, enum: AgeRange })
   @IsEnum(AgeRange)
-  age_range?: string;
+  @ApiProperty()
+  ageRange?: string;
 
   @Column('enum', { enum: UserRole, default: UserRole.Client })
   @IsEnum(UserRole)
+  @ApiProperty({ enum: UserRole })
   role: UserRole;
 }

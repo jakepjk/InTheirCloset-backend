@@ -25,14 +25,14 @@ export class AuthController {
     // above details can be used to generate a token and send back to the Client
     const { accessToken } = await this.authService.login(user);
 
-    const { platform, platformId, nickname, gender, age_range, role } = user;
+    const { platform, platformId, nickname, gender, ageRange, role } = user;
 
     const data = {
       platform,
       platformId,
       nickname,
       gender,
-      age_range,
+      ageRange,
       role,
     };
 
