@@ -10,7 +10,8 @@ import { FashionModule } from './fashion/fashion.module';
 import { Fashion } from 'src/fashion/entities/fashion.entity';
 import { AppController } from 'src/app.controller';
 import { CloudflareModule } from './cloudflare/cloudflare.module';
-import { FashionCategory } from 'src/fashion/entities/fashion.entity copy';
+import { MediaModule } from './media/media.module';
+import { Media } from 'src/media/entities/media.entity';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { FashionCategory } from 'src/fashion/entities/fashion.entity copy';
       database: process.env.DB_NAME,
       synchronize: process.env.DB_SYNC === 'true',
       logging: process.env.NODE_ENV === 'dev',
-      entities: [User, Fashion, FashionCategory],
+      entities: [User, Fashion, Media],
     }),
     UsersModule,
     AuthModule,
@@ -48,6 +49,7 @@ import { FashionCategory } from 'src/fashion/entities/fashion.entity copy';
       accountHash: process.env.CLOUDFLARE_ACCOUNT_HASH,
       imageDeliveryURL: process.env.CLOUDFLARE_IMAGE_DELIVERY_URL,
     }),
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [],
