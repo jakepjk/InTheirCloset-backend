@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AllowedRoles } from 'src/auth/role/role.decorator';
 import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/users/user.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -41,11 +41,11 @@ export class RoleGuard extends AuthGuard('roles') {
         decoded.hasOwnProperty('platform') &&
         decoded.hasOwnProperty('platformId')
       ) {
-        const user = await this.usersService.findByPlatform({
+        const { ok, user } = await this.usersService.findByPlatform({
           platform: decoded['platform'],
           platformId: decoded['platformId'],
         });
-        if (!user) return false;
+        if (!ok) return false;
         ctx['user'] = user;
         if (roles.includes('Any')) return true;
         return roles.includes(user.role);
