@@ -6,8 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleGuard } from 'src/auth/role/role.guard';
 import { KakaoStrategy } from 'src/auth/strategy/kakao.strategy';
 import { User } from 'src/users/entities/user.entity';
-import { UsersModule } from 'src/users/users.module';
-import { UsersService } from 'src/users/users.service';
+import { UsersModule } from 'src/users/user.module';
+import { UsersService } from 'src/users/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 

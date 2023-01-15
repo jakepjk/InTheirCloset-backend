@@ -1,24 +1,14 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity } from 'typeorm';
 import { IsString, IsEnum, IsNumber, IsArray } from 'class-validator';
-
-// TODO: Steps 목록 생성
-export enum Steps {
-  Saved = 'Saved',
-  Requested = 'Requested',
-  Registered = 'Registered',
-  Deleted = 'Deleted',
-}
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Fashion extends CommonEntity {
   @Column('text')
   @IsString()
-  name: string;
-
-  @Column('text', { nullable: true })
-  @IsString()
-  description?: string;
+  @ApiProperty()
+  title: string;
 
   @Column('text', { nullable: true })
   @IsString()
@@ -63,8 +53,4 @@ export class Fashion extends CommonEntity {
   @Column('text', { nullable: true, array: true })
   @IsArray()
   images?: string[];
-
-  @Column('enum', { enum: Steps })
-  @IsEnum(Steps)
-  steps: Steps;
 }

@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserLoginDto } from 'src/users/dto/user-login.dto';
 import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/users/user.service';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -16,11 +16,11 @@ export class AuthService {
   async validateKakaoUser(userLoginDto: UserLoginDto): Promise<User> {
     const { platformId, platform } = userLoginDto;
 
-    const user = await this.usersService.findByPlatform({
+    const { ok, user } = await this.usersService.findByPlatform({
       platformId,
       platform,
     });
-    if (user) {
+    if (ok) {
       return user;
     }
 

@@ -1,6 +1,6 @@
 import { CommonEntity } from 'src/common/entities/common.entity';
 import { Column, Entity, Long } from 'typeorm';
-import { IsString, IsEnum } from 'class-validator';
+import { IsString, IsEnum, IsEmail, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum Gender {
@@ -28,12 +28,28 @@ export enum UserRole {
   Client = 'Client',
 }
 
+export enum Platform {
+  KFL = 'kfl',
+  Kakao = 'kakao',
+  Naver = 'naver',
+}
+
 @Entity()
 export class User extends CommonEntity {
-  @Column('text')
+  @Column('text', { nullable: true })
+  @IsEmail()
+  @ApiProperty()
+  email?: string;
+
+  @Column('text', { nullable: true })
   @IsString()
   @ApiProperty()
-  platform: string;
+  password?: string;
+
+  @Column('enum', { enum: Platform })
+  @IsEnum(Platform)
+  @ApiProperty()
+  platform: Platform;
 
   @Column('text', { nullable: true })
   @IsString()
@@ -50,10 +66,15 @@ export class User extends CommonEntity {
   @ApiProperty({ enum: Gender })
   gender?: Gender;
 
-  @Column('enum', { nullable: true, enum: AgeRange })
-  @IsEnum(AgeRange)
+  // @Column('enum', { nullable: true, enum: AgeRange })
+  // @IsEnum(AgeRange)
+  // @ApiProperty()
+  // ageRange?: string;
+
+  @Column('int', { nullable: true })
+  @IsInt()
   @ApiProperty()
-  ageRange?: string;
+  yearOfBirth?: number;
 
   @Column('enum', { enum: UserRole, default: UserRole.Client })
   @IsEnum(UserRole)
