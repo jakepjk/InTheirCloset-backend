@@ -31,6 +31,7 @@ export class MediaService {
       return { ok: false, error: PageError.LimitMustBeNaturalNumber };
     try {
       const [medias, count] = await this.mediaRepository.findAndCount({
+        select: ['id', 'title', 'image'],
         where: [
           { type, title: Like(`%${search}%`) },
           { type, subtitle: Like(`%${search}%`) },

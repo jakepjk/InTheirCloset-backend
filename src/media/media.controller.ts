@@ -31,7 +31,7 @@ export class MediaController {
     return this.mediaService.findAll(type, search, limit, page);
   }
 
-  @Get(':id')
+  @Get('/detail/:id')
   findOne(@Param('id') id: string): Promise<GetMediaDetailDto> {
     return this.mediaService.findOne(+id);
   }
