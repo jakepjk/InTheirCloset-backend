@@ -8,18 +8,29 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { GetMediaDetailDto, GetMediasDto } from 'src/media/dto/get-media';
-import { MediaType } from 'src/media/entities/media.entity';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role/role.decorator';
+import { GetMediaDetailDto, GetMediasDto } from 'src/media/dto/get-media.dto';
+import {
+  RequestCreateMediaBodyDto,
+  RequestCreateMediaDto,
+} from 'src/media/dto/request-media.dto';
+import { Media, MediaType } from 'src/media/entities/media.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
 import { MediaService } from './media.service';
 
 @Controller('media')
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  // @Post()
-  // create(@Body() createMediaDto: CreateMediaDto) {
-  //   return this.mediaService.create(createMediaDto);
-  // }
+  @Role([UserRole.Admin, UserRole.Manager])
+  @Post()
+  create(
+    @AuthUser() user: User,
+    @Body() requestCreateMediaBodyDto: RequestCreateMediaBodyDto,
+  ): Promise<RequestCreateMediaDto> {
+    return this.mediaService.createRequest(user, requestCreateMediaBodyDto);
+  }
 
   @Get(':type')
   findAll(

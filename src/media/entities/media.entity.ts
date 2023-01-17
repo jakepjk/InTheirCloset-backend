@@ -24,10 +24,10 @@ export class Media extends CommonEntity {
   @ApiProperty()
   type: MediaType;
 
-  @Column('text', { nullable: true })
+  @Column('text')
   @IsUrl()
   @ApiProperty()
-  image?: string;
+  image: string;
 
   @Column('text', { default: [], array: true })
   @IsArray()
