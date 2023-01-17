@@ -29,7 +29,7 @@ export enum UserRole {
 }
 
 export enum Platform {
-  KFL = 'kfl',
+  KoreanFashionLab = 'koreanfashionlab',
   Kakao = 'kakao',
   Naver = 'naver',
 }
@@ -41,7 +41,7 @@ export class User extends CommonEntity {
   @ApiProperty()
   email?: string;
 
-  @Column('text', { nullable: true })
+  @Column('text', { nullable: true, select: false })
   @IsString()
   @ApiProperty()
   password?: string;

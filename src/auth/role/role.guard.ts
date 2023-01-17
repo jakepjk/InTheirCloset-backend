@@ -34,7 +34,6 @@ export class RoleGuard extends AuthGuard('roles') {
 
     if (token) {
       const decoded = this.jwtService.verify(token);
-      console.log(decoded);
 
       if (
         typeof decoded === 'object' &&

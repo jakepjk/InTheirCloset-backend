@@ -12,6 +12,8 @@ import { AppController } from 'src/app.controller';
 import { CloudflareModule } from './cloudflare/cloudflare.module';
 import { MediaModule } from './media/media.module';
 import { Media } from 'src/media/entities/media.entity';
+import { RequestMediaModule } from './requests/request_media/request_media.module';
+import { RequestMedia } from 'src/requests/request_media/entities/request_media.entity';
 
 @Module({
   imports: [
@@ -38,7 +40,7 @@ import { Media } from 'src/media/entities/media.entity';
       database: process.env.DB_NAME,
       synchronize: process.env.DB_SYNC === 'true',
       logging: process.env.NODE_ENV === 'dev',
-      entities: [User, Fashion, Media],
+      entities: [User, Fashion, Media, RequestMedia],
     }),
     UsersModule,
     AuthModule,
@@ -50,6 +52,7 @@ import { Media } from 'src/media/entities/media.entity';
       imageDeliveryURL: process.env.CLOUDFLARE_IMAGE_DELIVERY_URL,
     }),
     MediaModule,
+    RequestMediaModule,
   ],
   controllers: [AppController],
   providers: [],
