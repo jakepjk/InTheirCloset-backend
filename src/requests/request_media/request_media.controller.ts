@@ -15,12 +15,15 @@ import { RequestStatus, RequestType } from 'src/requests/request.enum';
 import { GetRequestMediaDto } from 'src/requests/request_media/dto/get-request_media.dto';
 import { ProcessRequestBodyMediaDto } from 'src/requests/request_media/dto/proess-request_media.dto';
 import { CommonDto } from 'src/common/dto/common.dto';
+import { Role } from 'src/auth/role/role.decorator';
+import { UserRole } from 'src/users/entities/user.entity';
 
 @Controller('request/media')
 export class RequestMediaController {
   constructor(private readonly requestMediaService: RequestMediaService) {}
 
   @Post('approved')
+  @Role([UserRole.Admin])
   approveRequestMedia(
     @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
   ): Promise<CommonDto> {
@@ -28,6 +31,7 @@ export class RequestMediaController {
   }
 
   @Post('rejected')
+  @Role([UserRole.Admin])
   rejectRequestMedia(
     @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
   ): Promise<CommonDto> {
@@ -39,6 +43,7 @@ export class RequestMediaController {
   //   return this.requestMediaService.findAll();
   // }
 
+  @Role([UserRole.Admin, UserRole.Manager])
   @Get()
   findOne(
     @Query('user') userId?: number,
