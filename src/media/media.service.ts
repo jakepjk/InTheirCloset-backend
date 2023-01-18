@@ -3,12 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role/role.decorator';
 import { DEFAULT_LIMIT } from 'src/common/common.constants';
+import { CommonDto } from 'src/common/dto/common.dto';
 import { getPageInfo, PageDto, PageError } from 'src/common/dto/page.dto';
 import { GetMediaDetailDto, GetMediasDto } from 'src/media/dto/get-media.dto';
-import {
-  RequestCreateMediaBodyDto,
-  RequestCreateMediaDto,
-} from 'src/media/dto/request-media.dto';
+import { RequestMediaBodyDto } from 'src/media/dto/request-media.dto';
 import { Media, MediaType } from 'src/media/entities/media.entity';
 import { RequestStatus, RequestType } from 'src/requests/request.enum';
 import { RequestMedia } from 'src/requests/request_media/entities/request_media.entity';
@@ -31,19 +29,11 @@ export class MediaService {
 
   async createRequest(
     user: User,
-    requestCreateMediaBodyDto: RequestCreateMediaBodyDto,
-  ): Promise<RequestCreateMediaDto> {
-    const media = requestCreateMediaBodyDto.media;
+    requestMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    const media = requestMediaBodyDto.media;
     try {
-      console.log(media);
-
-      const duplicate = await this.mediaRepository.findOne({
-        where: {
-          title: media.title,
-          subtitle: media.subtitle,
-        },
-      });
-
+      const duplicate = this.findOneByTitle(media.title, media.subtitle);
       if (duplicate) return { ok: false, error: MediaError.Duplicate };
 
       await this.requestMediaRepository.save(
@@ -52,13 +42,6 @@ export class MediaService {
           requester: user,
           status: RequestStatus.Proceeding,
           ...media,
-          // title: media.title,
-          // subtitle: media.subtitle,
-          // type: media.type,
-          // image: media.image,
-          // genre: media.genre,
-          // season: media.season,
-          // episodesNumber: media.episodesNumber,
         }),
       );
       return { ok: true };
@@ -106,11 +89,78 @@ export class MediaService {
     }
   }
 
-  // update(id: number, updateMediaDto: UpdateMediaDto) {
-  //   return `This action updates a #${id} media`;
-  // }
+  async findOneByTitle(
+    title?: string,
+    subtitle?: string,
+  ): Promise<Media | null> {
+    const media = await this.mediaRepository.findOne({
+      where: {
+        title: title ?? null,
+        subtitle: subtitle ?? null,
+      },
+    });
+    return media;
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} media`;
-  // }
+  async updateRequest(
+    user: User,
+    requestMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    const media = requestMediaBodyDto.media;
+    try {
+      console.log(media);
+
+      const beforeMedia = await this.mediaRepository.findOne({
+        where: {
+          id: media.id,
+        },
+      });
+      if (!beforeMedia) return { ok: false, error: MediaError.MediaNotExist };
+
+      const duplicate = this.findOneByTitle(media?.title, media?.subtitle);
+      if (duplicate) return { ok: false, error: MediaError.Duplicate };
+
+      await this.requestMediaRepository.save(
+        this.requestMediaRepository.create({
+          requestType: RequestType.Update,
+          requester: user,
+          status: RequestStatus.Proceeding,
+          media: beforeMedia,
+          ...media,
+        }),
+      );
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
+
+  async removeRequest(
+    user: User,
+    requestMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    const media = requestMediaBodyDto.media;
+    try {
+      console.log(media);
+
+      const beforeMedia = await this.mediaRepository.findOne({
+        where: {
+          id: media.id,
+        },
+      });
+      if (!beforeMedia) return { ok: false, error: MediaError.MediaNotExist };
+
+      await this.requestMediaRepository.save(
+        this.requestMediaRepository.create({
+          requestType: RequestType.Delete,
+          requester: user,
+          status: RequestStatus.Proceeding,
+          media: beforeMedia,
+        }),
+      );
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
 }

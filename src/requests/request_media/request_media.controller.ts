@@ -13,15 +13,26 @@ import { CreateRequestMediaDto } from './dto/create-request_media.dto';
 import { UpdateRequestMediaDto } from './dto/update-request_media.dto';
 import { RequestStatus, RequestType } from 'src/requests/request.enum';
 import { GetRequestMediaDto } from 'src/requests/request_media/dto/get-request_media.dto';
+import { ProcessRequestBodyMediaDto } from 'src/requests/request_media/dto/proess-request_media.dto';
+import { CommonDto } from 'src/common/dto/common.dto';
 
 @Controller('request/media')
 export class RequestMediaController {
   constructor(private readonly requestMediaService: RequestMediaService) {}
 
-  // @Post()
-  // create(@Body() createRequestMediaDto: CreateRequestMediaDto) {
-  //   return this.requestMediaService.create(createRequestMediaDto);
-  // }
+  @Post('approved')
+  approveRequestMedia(
+    @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ): Promise<CommonDto> {
+    return this.requestMediaService.approveRequestMedia(processRequestMediaDto);
+  }
+
+  @Post('rejected')
+  rejectRequestMedia(
+    @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ): Promise<CommonDto> {
+    return this.requestMediaService.rejectRequestMedia(processRequestMediaDto);
+  }
 
   // @Get()
   // findAll() {

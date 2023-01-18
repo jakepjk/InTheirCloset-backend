@@ -29,10 +29,10 @@ export class Media extends CommonEntity {
   @ApiProperty()
   image: string;
 
-  @Column('text', { default: [], array: true })
+  @Column('text', { nullable: true, array: true })
   @IsArray()
   @ApiProperty()
-  genre: string[];
+  genre?: string[];
 
   @Column('text', { nullable: true })
   @IsString()
