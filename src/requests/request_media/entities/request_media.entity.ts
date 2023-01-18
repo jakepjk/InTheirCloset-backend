@@ -29,7 +29,11 @@ export class RequestMedia extends CommonEntity {
   comment?: string;
 
   @ApiProperty()
-  @ManyToOne(() => Media, { eager: true, nullable: true })
+  @ManyToOne(() => Media, {
+    eager: true,
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   @JoinTable()
   media?: Media;
 
@@ -55,7 +59,7 @@ export class RequestMedia extends CommonEntity {
   image?: string;
 
   @ApiProperty()
-  @Column('text', { default: [], array: true, nullable: true })
+  @Column('text', { array: true, nullable: true })
   @IsArray()
   genre?: string[];
 

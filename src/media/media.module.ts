@@ -9,5 +9,6 @@ import { RequestMedia } from 'src/requests/request_media/entities/request_media.
   imports: [TypeOrmModule.forFeature([Media, RequestMedia])],
   controllers: [MediaController],
   providers: [MediaService],
+  exports: [MediaService],
 })
 export class MediaModule {}

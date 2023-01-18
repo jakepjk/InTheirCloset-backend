@@ -10,11 +10,9 @@ import {
 } from '@nestjs/common';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role/role.decorator';
+import { CommonDto } from 'src/common/dto/common.dto';
 import { GetMediaDetailDto, GetMediasDto } from 'src/media/dto/get-media.dto';
-import {
-  RequestCreateMediaBodyDto,
-  RequestCreateMediaDto,
-} from 'src/media/dto/request-media.dto';
+import { RequestMediaBodyDto } from 'src/media/dto/request-media.dto';
 import { Media, MediaType } from 'src/media/entities/media.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { MediaService } from './media.service';
@@ -25,10 +23,10 @@ export class MediaController {
 
   @Role([UserRole.Admin, UserRole.Manager])
   @Post()
-  create(
+  createRequest(
     @AuthUser() user: User,
-    @Body() requestCreateMediaBodyDto: RequestCreateMediaBodyDto,
-  ): Promise<RequestCreateMediaDto> {
+    @Body() requestCreateMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
     return this.mediaService.createRequest(user, requestCreateMediaBodyDto);
   }
 
@@ -47,13 +45,21 @@ export class MediaController {
     return this.mediaService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateMediaDto: UpdateMediaDto) {
-  //   return this.mediaService.update(+id, updateMediaDto);
-  // }
+  @Role([UserRole.Admin, UserRole.Manager])
+  @Patch()
+  updateRequest(
+    @AuthUser() user: User,
+    @Body() requestMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    return this.mediaService.updateRequest(user, requestMediaBodyDto);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.mediaService.remove(+id);
-  // }
+  @Role([UserRole.Admin, UserRole.Manager])
+  @Delete()
+  removeRequest(
+    @AuthUser() user: User,
+    @Body() requestMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    return this.mediaService.removeRequest(user, requestMediaBodyDto);
+  }
 }
