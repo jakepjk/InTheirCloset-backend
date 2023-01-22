@@ -74,4 +74,12 @@ export class CloudflareService {
       return null;
     }
   }
+
+  isCloudflareImage(imageUrl: string): boolean {
+    return imageUrl.startsWith(process.env.CLOUDFLARE_IMAGE_DELIVERY_URL);
+  }
+
+  getCloudflareUrl(imageId: string): string {
+    return process.env.CLOUDFLARE_IMAGE_DELIVERY_URL + '/' + imageId;
+  }
 }

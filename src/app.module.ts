@@ -14,6 +14,8 @@ import { MediaModule } from './media/media.module';
 import { Media } from 'src/media/entities/media.entity';
 import { RequestMediaModule } from './requests/request_media/request_media.module';
 import { RequestMedia } from 'src/requests/request_media/entities/request_media.entity';
+import { ApparelModule } from './apparel/apparel.module';
+import { Apparel } from 'src/apparel/entities/apparel.entity';
 
 @Module({
   imports: [
@@ -40,7 +42,7 @@ import { RequestMedia } from 'src/requests/request_media/entities/request_media.
       database: process.env.DB_NAME,
       synchronize: process.env.DB_SYNC === 'true',
       logging: process.env.NODE_ENV === 'dev',
-      entities: [User, Fashion, Media, RequestMedia],
+      entities: [User, Fashion, Media, RequestMedia, Apparel],
     }),
     UsersModule,
     AuthModule,
@@ -53,6 +55,7 @@ import { RequestMedia } from 'src/requests/request_media/entities/request_media.
     }),
     MediaModule,
     RequestMediaModule,
+    ApparelModule,
   ],
   controllers: [AppController],
   providers: [],
