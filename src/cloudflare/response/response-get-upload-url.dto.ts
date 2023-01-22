@@ -21,3 +21,15 @@ export class ResponseGetUploadUrlDto {
   @ApiProperty()
   messages: string[];
 }
+
+export class ResponseDeleteUrlDto {
+  result: ResultGetUploadUrl;
+
+  result_info: string;
+
+  success: boolean;
+
+  errors: string[];
+
+  messages: string[];
+}
