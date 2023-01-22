@@ -30,9 +30,12 @@ export class RoleGuard extends AuthGuard('roles') {
     }
 
     const ctx = context.switchToHttp().getRequest();
-    const token = ctx.headers.authorization;
+    const authorization: string = ctx.headers.authorization;
 
-    if (token) {
+    if (authorization) {
+      const Bearer = authorization.split(' ')[0];
+      if (Bearer !== 'Bearer') return false;
+      const token = authorization.split(' ')[1];
       const decoded = this.jwtService.verify(token);
 
       if (

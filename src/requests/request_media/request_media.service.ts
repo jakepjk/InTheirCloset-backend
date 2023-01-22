@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CloudflareService } from 'src/cloudflare/cloudflare.service';
 import { DEFAULT_LIMIT } from 'src/common/common.constants';
 import { CommonDto } from 'src/common/dto/common.dto';
 import { getPageInfo, PageError } from 'src/common/dto/page.dto';
@@ -9,6 +10,7 @@ import { RequestStatus, RequestType } from 'src/requests/request.enum';
 import { GetRequestMediaDto } from 'src/requests/request_media/dto/get-request_media.dto';
 import { ProcessRequestBodyMediaDto } from 'src/requests/request_media/dto/proess-request_media.dto';
 import { RequestMedia } from 'src/requests/request_media/entities/request_media.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
 import { In, MoreThan, Repository } from 'typeorm';
 import { CreateRequestMediaDto } from './dto/create-request_media.dto';
 import { UpdateRequestMediaDto } from './dto/update-request_media.dto';
@@ -19,12 +21,16 @@ enum RequestMediaError {
   ProcessNotAllowed = '승인 또는 거절만 가능합니다.',
   MediaNotExist = '미디어 정보가 없습니다.',
   CommentRequired = '코멘트가 필요합니다.',
+  DeleteRequestCannotUpdate = '삭제 요청은 수정할 수 없습니다.',
+  NoAuthentication = '권한이 없습니다.',
+  CannotChangeFinshedRequest = '완료된 요청은 변경할 수 없습니다.',
 }
 
 @Injectable()
 export class RequestMediaService {
   constructor(
     private readonly mediaService: MediaService,
+    private readonly cloudflareService: CloudflareService,
     @InjectRepository(RequestMedia)
     private readonly requestMediaRepository: Repository<RequestMedia>,
     @InjectRepository(Media)
@@ -40,6 +46,7 @@ export class RequestMediaService {
        * 가져온 requestMedia가 가르키는 Media 가져오기
        * type이 create이면 해당 Media가 중복되는 지 확인 후 media 저장
        * type이 create가 아니면 해당 Media 존재하는지 확인
+       * type이 update이면 바꾸려는 title, subtitle이 media에 존재하는지 확인
        * type에 따라 media 업데이트 or 삭제
        * requestMedia 업데이트
        */
@@ -59,11 +66,8 @@ export class RequestMediaService {
 
       // type이 create이면 해당 Media가 중복되는 지 확인 후 저장
       if (requestMedia.requestType == RequestType.Create) {
-        const duplicate = await this.mediaService.findOneByTitle(
-          media?.title,
-          media?.subtitle,
-        );
-        if (duplicate) return { ok: false, error: RequestMediaError.Duplicate };
+        if (await this.mediaService.isDuplicated(media?.title, media?.subtitle))
+          return { ok: false, error: RequestMediaError.Duplicate };
 
         const afterMedia = await this.mediaRepository.save(
           this.mediaRepository.create({
@@ -90,18 +94,18 @@ export class RequestMediaService {
       // type이 create가 아니면 해당 Media 존재하는지 확인
       if (!media) return { ok: false, error: RequestMediaError.MediaNotExist };
 
-      // type에 따라 media 업데이트 or 삭제
-      console.log({
-        ...media,
-        title: requestMedia.title ?? media.title,
-        subtitle: requestMedia.subtitle ?? media.subtitle,
-        image: requestMedia.image ?? media.image,
-        genre: requestMedia.genre ?? media.genre,
-        season: requestMedia.season ?? media.season,
-        type: requestMedia.type ?? media.type,
-        episodesNumber: requestMedia.episodesNumber ?? media.episodesNumber,
-      });
+      // type이 update이면 바꾸려는 title, subtitle이 media에 존재하는지 확인
+      if (requestMedia.requestType == RequestType.Update) {
+        if (
+          await this.mediaService.isDuplicated(
+            requestMedia?.title,
+            requestMedia?.subtitle,
+          )
+        )
+          return { ok: false, error: RequestMediaError.Duplicate };
+      }
 
+      // type에 따라 media 업데이트 or 삭제
       let afterMedia: Media | null;
       if (requestMedia.requestType == RequestType.Update) {
         afterMedia = await this.mediaRepository.save({
@@ -182,10 +186,10 @@ export class RequestMediaService {
         await this.requestMediaRepository.findAndCount({
           where: {
             requester: {
-              id: userId ?? MoreThan(0),
+              id: userId,
             },
-            status: status ?? In(Object.values(RequestStatus)),
-            requestType: type ?? In(Object.values(RequestType)),
+            status: status,
+            requestType: type,
           },
           skip: (limit ?? DEFAULT_LIMIT) * ((page ?? 1) - 1),
           take: limit,
@@ -201,11 +205,140 @@ export class RequestMediaService {
     return `This action returns a #${id} requestMedia`;
   }
 
-  update(id: number, updateRequestMediaDto: UpdateRequestMediaDto) {
-    return `This action updates a #${id} requestMedia`;
+  async updateRequestMedia(
+    user: User,
+    processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ): Promise<CommonDto> {
+    try {
+      /**
+       * requestMedia 가져오기 (없으면 에러)
+       * user Role이 Manager이고 requestMedia의 requester (아니면 에러)
+       * requestMedia의 status가 proceeding이나 stash (아니면 에러)
+       * type이 delete이면 수정 불가능 (=에러)
+       * title 중복 확인 (중복되면 에러)
+       * 이미지가 수정되면 cloudflare에 이미지 추가
+       * requestMedia 업데이트
+       *
+       */
+      const updateRequest = processRequestMediaDto.requestMedia;
+
+      // requestMedia 가져오기 (없으면 에러)
+      const requestMedia = await this.requestMediaRepository.findOne({
+        where: {
+          id: updateRequest.id,
+        },
+      });
+      if (!requestMedia)
+        return { ok: false, error: RequestMediaError.RequestMediaNotExist };
+
+      // user Role이 Manager이고 requestMedia의 requester가 아니면 에러
+      if (
+        user.role === UserRole.Manager &&
+        requestMedia.requester.id !== user.id
+      )
+        return { ok: false, error: RequestMediaError.NoAuthentication };
+
+      // requestMedia의 status가 proceeding이거나 stash (아니면 에러)
+      if (
+        requestMedia.status !== RequestStatus.Proceeding &&
+        requestMedia.status !== RequestStatus.Stashed
+      )
+        return {
+          ok: false,
+          error: RequestMediaError.CannotChangeFinshedRequest,
+        };
+
+      // updateRequest의 status가 없으면 requestMedia status를 따라감
+      updateRequest.status = updateRequest.status ?? requestMedia.status;
+
+      // type이 delete이면 수정 불가능 (=에러)
+      if (requestMedia.requestType === RequestType.Delete) {
+        return {
+          ok: false,
+          error: RequestMediaError.DeleteRequestCannotUpdate,
+        };
+      }
+
+      // title 중복 확인 (중복되면 에러)
+      if (updateRequest.status !== RequestStatus.Stashed)
+        if (
+          await this.mediaService.isDuplicated(
+            updateRequest.title,
+            updateRequest.subtitle,
+          )
+        )
+          return { ok: false, error: RequestMediaError.Duplicate };
+
+      // 이미지가 수정되면 cloudflare에 이미치 추가
+      if (
+        updateRequest.image &&
+        !updateRequest.image.startsWith(
+          process.env.CLOUDFLARE_IMAGE_DELIVERY_URL,
+        )
+      ) {
+        const { result, success, errors } =
+          await this.cloudflareService.uploadImageByUrl({
+            imageUrl: updateRequest.image,
+          });
+
+        if (!success) return { ok: false, error: errors.join('\n') };
+        updateRequest.image =
+          process.env.CLOUDFLARE_IMAGE_DELIVERY_URL + '/' + result.id;
+      }
+
+      await this.requestMediaRepository.save({
+        ...requestMedia,
+        status: updateRequest.status,
+        type: updateRequest.type,
+        title: updateRequest.title,
+        subtitle: updateRequest.subtitle,
+        image: updateRequest.image,
+        genre: updateRequest.genre,
+        season: updateRequest.season,
+        episodesNumber: updateRequest.episodesNumber,
+      });
+
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} requestMedia`;
+  async removeRequestMedia(
+    user: User,
+    processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ): Promise<CommonDto> {
+    try {
+      /**
+       * requestMedia 가져오기 (없으면 에러)
+       * user Role이 Manager이고 requestMedia의 requester가 아니면 에러
+       * 해당 requestMeida 삭제
+       */
+
+      // requestMedia 가져오기 (없으면 에러)
+      const requestMedia = await this.requestMediaRepository.findOne({
+        where: {
+          id: processRequestMediaDto.requestMedia.id,
+        },
+      });
+      if (!requestMedia)
+        return { ok: false, error: RequestMediaError.RequestMediaNotExist };
+
+      // user Role이 Manager이고 requestMedia의 requester가 아니면 에러
+      if (
+        user.role === UserRole.Manager &&
+        requestMedia.requester.id !== user.id
+      )
+        return { ok: false, error: RequestMediaError.NoAuthentication };
+
+      // 해당 requestMedia 삭제
+      await this.requestMediaRepository.delete({ id: requestMedia.id });
+
+      return { ok: true };
+    } catch (error) {
+      console.log(error);
+
+      return { ok: false, error };
+    }
   }
 }

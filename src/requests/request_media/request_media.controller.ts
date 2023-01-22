@@ -16,7 +16,8 @@ import { GetRequestMediaDto } from 'src/requests/request_media/dto/get-request_m
 import { ProcessRequestBodyMediaDto } from 'src/requests/request_media/dto/proess-request_media.dto';
 import { CommonDto } from 'src/common/dto/common.dto';
 import { Role } from 'src/auth/role/role.decorator';
-import { UserRole } from 'src/users/entities/user.entity';
+import { User, UserRole } from 'src/users/entities/user.entity';
+import { AuthUser } from 'src/auth/auth-user.decorator';
 
 @Controller('request/media')
 export class RequestMediaController {
@@ -45,7 +46,7 @@ export class RequestMediaController {
 
   @Role([UserRole.Admin, UserRole.Manager])
   @Get()
-  findOne(
+  findAll(
     @Query('user') userId?: number,
     @Query('status') status?: RequestStatus,
     @Query('type') type?: RequestType,
@@ -55,16 +56,31 @@ export class RequestMediaController {
     return this.requestMediaService.findAll(userId, status, type, limit, page);
   }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateRequestMediaDto: UpdateRequestMediaDto,
-  // ) {
-  //   return this.requestMediaService.update(+id, updateRequestMediaDto);
-  // }
+  @Role([UserRole.Admin, UserRole.Manager])
+  @Patch()
+  updateRequestMedia(
+    @AuthUser() user: User,
+    @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ) {
+    return this.requestMediaService.updateRequestMedia(
+      user,
+      processRequestMediaDto,
+    );
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.requestMediaService.remove(+id);
-  // }
+  @Role([UserRole.Admin, UserRole.Manager])
+  @Delete()
+  remove(
+    @AuthUser() user: User,
+    @Body() processRequestMediaDto: ProcessRequestBodyMediaDto,
+  ) {
+    console.log(user);
+
+    console.log(processRequestMediaDto);
+
+    return this.requestMediaService.removeRequestMedia(
+      user,
+      processRequestMediaDto,
+    );
+  }
 }

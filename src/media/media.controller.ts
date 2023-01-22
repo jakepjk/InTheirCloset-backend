@@ -21,15 +21,6 @@ import { MediaService } from './media.service';
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 
-  @Role([UserRole.Admin, UserRole.Manager])
-  @Post()
-  createRequest(
-    @AuthUser() user: User,
-    @Body() requestCreateMediaBodyDto: RequestMediaBodyDto,
-  ): Promise<CommonDto> {
-    return this.mediaService.createRequest(user, requestCreateMediaBodyDto);
-  }
-
   @Get(':type')
   findAll(
     @Param('type') type: MediaType,
@@ -46,12 +37,27 @@ export class MediaController {
   }
 
   @Role([UserRole.Admin, UserRole.Manager])
+  @Post()
+  createRequest(
+    @Query('stash') stash: boolean,
+    @AuthUser() user: User,
+    @Body() requestCreateMediaBodyDto: RequestMediaBodyDto,
+  ): Promise<CommonDto> {
+    return this.mediaService.createRequest(
+      stash,
+      user,
+      requestCreateMediaBodyDto,
+    );
+  }
+
+  @Role([UserRole.Admin, UserRole.Manager])
   @Patch()
   updateRequest(
+    @Query('stash') stash: boolean,
     @AuthUser() user: User,
     @Body() requestMediaBodyDto: RequestMediaBodyDto,
   ): Promise<CommonDto> {
-    return this.mediaService.updateRequest(user, requestMediaBodyDto);
+    return this.mediaService.updateRequest(stash, user, requestMediaBodyDto);
   }
 
   @Role([UserRole.Admin, UserRole.Manager])

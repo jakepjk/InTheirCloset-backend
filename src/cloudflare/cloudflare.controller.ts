@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import {
   ApiBody,
   ApiHeader,
@@ -23,7 +23,12 @@ export class CloudflareController {
   }
 
   @Get('/image/file')
-  uploadImageByFile() {
+  async uploadImageByFile() {
     return this.cloudflareService.getUploadUrl();
+  }
+
+  @Delete('/image/:imageId')
+  async deleteImage(@Param('imageId') imageId: string) {
+    return this.cloudflareService.deleteImage(imageId);
   }
 }
