@@ -34,21 +34,12 @@ export class MediaService {
     private readonly cloudflareService: CloudflareService,
   ) {}
 
-  // util
-  // async findOneByTitle(titles: Titles): Promise<Media | null> {
-  //   if (!titles.title) return null;
-  //   const media = await this.mediaRepository.findOne({
-  //     where: titles,
-  //   });
-  //   return media;
-  // }
-
   async isDuplicated(title: string, subtitle: string): Promise<boolean> {
     if (title === undefined) return false;
     const duplicate = await this.mediaRepository.findOne({
       where: {
-        title: title,
-        subtitle: subtitle,
+        title,
+        subtitle,
       },
     });
     if (duplicate) return true;
@@ -108,18 +99,13 @@ export class MediaService {
       }
 
       // image가 cloudflare가 아니면 cloudflare에 저장 후 사용
-      if (
-        !requestMediaBodyDto.media.image.startsWith(
-          process.env.CLOUDFLARE_IMAGE_DELIVERY_URL,
-        )
-      ) {
+      if (this.cloudflareService.isCloudflareImage(media.image)) {
         const { success, result, errors } =
           await this.cloudflareService.uploadImageByUrl({
-            imageUrl: requestMediaBodyDto.media.image,
+            imageUrl: media.image,
           });
         if (success)
-          requestMediaBodyDto.media.image =
-            process.env.CLOUDFLARE_IMAGE_DELIVERY_URL + '/' + result.id;
+          media.image = this.cloudflareService.getCloudflareUrl(result.id);
         else return { ok: false, error: errors.join('\n') };
       }
 
